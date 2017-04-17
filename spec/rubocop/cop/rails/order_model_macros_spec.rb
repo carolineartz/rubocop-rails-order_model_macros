@@ -8,8 +8,33 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
     load_config_for cop, :default
   end
 
+  context 'without inheritance' do
+    let(:without_inheritance_sourde) do
+      inspect_source(
+        cop,
+        [
+          'module Bar',
+          '  class Foo',
+          '     has_one :foo',
+          '     has_and_belongs_to_many :bar',
+          '',
+          '     after_create :hoge',
+          '     before_create :fuga',
+          '  end',
+          'end'
+        ]
+      )
+    end
+
+    it 'recognizes the correct outer groupings' do
+      without_inheritance_sourde
+
+      expect(cop.messages).to eq []
+    end
+  end
+
   context 'outer grouping' do
-    let(:run_group_source_1) do
+    let(:valid_source) do
       inspect_source(
         cop,
         [
@@ -27,12 +52,12 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
     end
 
     it 'recognizes the correct outer groupings' do
-      run_group_source_1
+      valid_source
 
       expect(cop.messages).to eq []
     end
 
-    let(:run_group_source_2) do
+    let(:outer_grouping_error_source) do
       inspect_source(
         cop,
         [
@@ -57,7 +82,7 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
     end
 
     it 'recognizes the correct first grouping error' do
-      run_group_source_2
+      outer_grouping_error_source
 
       expect(cop.messages.first).to match(/Move associations above callbacks/)
       expect(cop.offenses.map(&:line).sort).to eq([3])
@@ -66,7 +91,7 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
     context 'custom macros' do
       before { load_config_for cop, :custom }
 
-      let(:run_group_source_3) do
+      let(:custom_macro_source) do
         inspect_source(
           cop,
           [
@@ -84,7 +109,7 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
       end
 
       it 'recognizes errors with custom macros' do
-        run_group_source_3
+        custom_macro_source
 
         expect(cop.messages.first).to match(/Move associations above customs/)
         expect(cop.offenses.map(&:line).sort).to eq([3])
@@ -93,7 +118,7 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
   end
 
   context 'inner grouping' do
-    let(:run_group_source_4) do
+    let(:inner_grouping_error_source) do
       inspect_source(
         cop,
         [
@@ -109,7 +134,7 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
     end
 
     it 'recognizes the correct ordering error within groups' do
-      run_group_source_4
+      inner_grouping_error_source
 
       expect(cop.messages.first).to match(/Not sorted within association/)
       expect(cop.messages.first).to match(/Move belongs_to above has_and_belongs_to_many/)

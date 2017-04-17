@@ -25,6 +25,7 @@ module RuboCop
 
           return unless body
           return unless body.begin_type?
+          return unless superclass && superclass.descendants.any?
           return unless %w(ActiveRecord ApplicationRecord).include?(superclass.descendants.first.const_name)
 
           targets = target_methods(body)
