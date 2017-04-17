@@ -1,0 +1,9 @@
+Rails/OrderModelMacros:
+  Custom:
+    - record_locked_by
+    - contract_aggregator
+    - media_contract_aggregator
+    - billing_aggregator
+    - delivery_aggregator
+    - performance_aggregator
+    - media_spend_aggregator

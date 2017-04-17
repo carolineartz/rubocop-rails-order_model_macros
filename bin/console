@@ -11,4 +11,4 @@ require "rubocop/rails/order_model_macros"
 # Pry.start
 
 require "irb"
-IRB.start(__FILE__)
+IRB.start

@@ -1,7 +1,15 @@
-module Rubocop
+require 'rubygems'
+
+module RuboCop
   module Rails
     module OrderModelMacros
-      VERSION = "0.1.0"
+      module Version
+        STRING = "0.1.0".freeze
+
+        def self.gem_version
+          Gem::Version.new(STRING)
+        end
+      end
     end
   end
 end

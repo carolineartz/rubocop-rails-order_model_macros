@@ -1,0 +1,31 @@
+Rails/OrderModelMacros:
+  Description: 'Sort macros methos in Rails models.'
+  Enabled: true
+  PreferredGroupOrdering:
+    - default_scope
+    - class_method
+    - enum
+    - association
+    - validation
+    - callback
+    - delegate
+    - rails
+    - gem
+    - custom
+    - scope
+  PreferredInnerGroupOrdering:
+    association:
+      - belongs_to
+      - has_one
+      - has_and_belongs_to_many
+      - has_many
+    validation:
+      - validates
+      - validate
+      - with_options
+  Rails:
+    - accepts_nested_attributes_for
+    - serialize
+    - store_accessor
+  Custom: null
+  Gem: null
