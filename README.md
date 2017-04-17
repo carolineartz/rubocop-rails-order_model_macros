@@ -12,15 +12,88 @@ gem 'rubocop-rails-order_model_macros'
 
 And then execute:
 
-    $ bundle
+```shell
+$ bundle
+```
 
 Or install it yourself as:
 
-    $ gem install rubocop-rails-order_model_macros
+```shell
+$ gem install rubocop-rails-order_model_macros
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+You need to tell RuboCop to load the `Rails/OrderModelMacros` extension. There are three ways to do this:
+
+### 1. RuboCop configuration file
+
+Put this into your `.rubocop.yml`:
+
+```ruby
+require: rubocop-rails-order_model_macros
+```
+
+Now you can run `rubocop` and it will automatically load the `RuboCop` `Rails/OrderModelMacros` cop together with the standard cops.
+
+### 2. Command line
+
+```
+rubocop --require rubocop-rails-order_model_macros
+```
+
+### 3. Rake task
+
+```ruby
+RuboCop::RakeTask.new do |task|
+  task.requires << 'rubocop-rails-order_model_macros'
+end
+```
+
+## Configuring the cops
+
+The [default configuration](config/default.yml) defines an outer group ordering, Rails macros to check, and inner group orderings for associations and validations.
+
+```yaml
+Rails/OrderModelMacros:
+  Description: 'Sort macros methos in Rails models.'
+  Enabled: true
+  PreferredGroupOrdering:
+    - default_scope
+    - class_method
+    - enum
+    - association
+    - validation
+    - callback
+    - delegate
+    - rails
+    - gem
+    - custom
+    - scope
+  PreferredInnerGroupOrdering:
+    association:
+      - belongs_to
+      - has_one
+      - has_and_belongs_to_many
+      - has_many
+    validation:
+      - validates
+      - validate
+      - with_options
+  Rails:
+    - accepts_nested_attributes_for
+    - serialize
+    - store_accessor
+  Custom: null
+  Gem: null
+```
+
+
+
+All of these may be customized. To only include a subset of groups, or to modify the order, define your own `PreferredGroupOrdering`. To add additional Rails macros, define a `Rails` array. Definitions overwrite defaults, so if you customize, be sure to copy over any desired types from the default set when applicable.
+
+- Add custom macros to `Custom`.
+- Add any Gem defined macros to `Gem`.
 
 ## Development
 
@@ -31,7 +104,6 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rubocop-rails-order_model_macros. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
 
 ## License
 
