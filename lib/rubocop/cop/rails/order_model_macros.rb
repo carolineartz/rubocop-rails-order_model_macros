@@ -23,8 +23,7 @@ module RuboCop
         def on_class(node)
           _name, superclass, body = *node
 
-          return unless body
-          return unless body.begin_type?
+          return unless body && body.begin_type?
           return unless superclass && superclass.descendants.any?
           return unless %w(ActiveRecord ApplicationRecord).include?(superclass.descendants.first.const_name)
 
@@ -49,10 +48,14 @@ module RuboCop
             ordered_for_type = preferred_group_ordering[type]
             squeezed = squeeze(targets_for_type.map(&:method_name))
 
+            mixed = squeezed != squeezed.uniq
+
             a = (ordered_for_type & squeezed)
             b = (squeezed & ordered_for_type)
 
-            a == b || (set_within_group_error_message(type, a, b) and false)
+            a = squeezed.drop_while { |el| squeezed.count(el) > 1 } if mixed
+
+            a == b or set_within_group_error_message(type, a, b) && false
           end
         end
 
@@ -70,7 +73,7 @@ module RuboCop
           a = type_order & squeezed
           b = squeezed & type_order
 
-          a == b || (set_outer_group_error_message(a, b) and false)
+          a == b or set_outer_group_error_message(a, b) && false
         end
 
         def single_groups?(targets)
@@ -84,9 +87,12 @@ module RuboCop
         end
 
         def target_methods(body)
-          body.children.compact.select do |child|
-            child.send_type? && matches_targets?(child.method_name)
-          end
+          body.children.compact.select(&method(:match)).map(&method(:match))
+        end
+
+        def match(child)
+          return child if child.send_type? && matches_targets?(child.method_name)
+          child.children && match(child.children.compact.first)
         end
 
         def matches_targets?(declared)
