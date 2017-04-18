@@ -92,7 +92,7 @@ module RuboCop
 
         def match(child)
           return child if child.send_type? && matches_targets?(child.method_name)
-          child.children && match(child.children.compact.first)
+          child.children && child.children.first && match(child.children.first)
         end
 
         def matches_targets?(declared)

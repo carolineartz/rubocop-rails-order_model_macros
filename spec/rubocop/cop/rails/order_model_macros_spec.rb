@@ -18,8 +18,8 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
           '     has_one :foo',
           '     has_and_belongs_to_many :bar',
           '',
-          '     after_create :hoge',
-          '     before_create :fuga',
+          '     after_create :meow',
+          '     before_create :moo',
           '  end',
           'end'
         ]
@@ -28,6 +28,34 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
 
     it 'recognizes the correct outer groupings' do
       without_inheritance_source
+
+      expect(cop.messages).to eq []
+    end
+  end
+
+  context 'with other things' do
+    let(:with_other_things_source) do
+      inspect_source(
+        cop,
+        [
+          'module Bar',
+          '  class Foo < ActiveRecord::Base',
+          '     include ::Bazzle::Baz',
+          '     MY_CONST = "cats"',
+          '',
+          '     has_one :foo',
+          '     has_and_belongs_to_many :bar',
+          '',
+          '     after_create :meow',
+          '     before_create :boo',
+          '  end',
+          'end'
+        ]
+      )
+    end
+
+    it 'recognizes the correct outer groupings' do
+      with_other_things_source
 
       expect(cop.messages).to eq []
     end
