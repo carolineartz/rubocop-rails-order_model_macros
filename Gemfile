@@ -1,9 +1,12 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in rubocop-rails-order_model_declarative_methods.gemspec
-# gem 'rubocop', git: "https://github.com/bbatsov/rubocop.git"
-gem 'rubocop', '~> 0.47.1'
-gem 'pry'
 gemspec
 
-gem "awesome_print", require: false
+gem "awesome_print"
+gem 'pry'
+gem "pry-byebug"
+gem "pry-doc"
+gem "pry-inline"
+gem "pry-rescue"
+gem "pry-stack_explorer"
+gem "pry-state"

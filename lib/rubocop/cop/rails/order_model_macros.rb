@@ -7,6 +7,7 @@ module RuboCop
         MSG = "Macros are not properly sorted."
         MSG_OUTER_GROUPS = "Macro method groups not sorted. Move %{group1} above %{group2}.".freeze
         MSG_WITHIN_GROUP = "Not sorted within %{type}. Move %{method1} above %{method2}.".freeze
+        MSG_MIXED_WITHIN_GROUP = "Not sorted within %{types}. Group %{type} types together."
 
         DEFAULT_SCOPE = :default_scope
         CLASS_METHODS = /^[mc]attr_(reader|writer|accessor)/
@@ -40,22 +41,17 @@ module RuboCop
         end
 
         def correct_within_groups?(targets)
-          grouped = targets
-            .group_by { |target| method_type(target) }
-            .keep_if { |type, _targets| GROUPED.include?(type) }
+          grouped = targets.group_by { |target| method_type(target) }.keep_if { |type, _targets| GROUPED.include?(type) }
 
           grouped.all? do |type, targets_for_type|
             ordered_for_type = preferred_group_ordering[type]
             squeezed = squeeze(targets_for_type.map(&:method_name))
 
             mixed = squeezed != squeezed.uniq
-
             a = (ordered_for_type & squeezed)
             b = (squeezed & ordered_for_type)
 
-            a = squeezed.drop_while { |el| squeezed.count(el) > 1 } if mixed
-
-            a == b or set_within_group_error_message(type, a, b) && false
+            !mixed && a == b or set_within_group_error_message(type, a, b, mixed: mixed) && false
           end
         end
 
@@ -91,8 +87,9 @@ module RuboCop
         end
 
         def match(child)
-          return child if child.send_type? && matches_targets?(child.method_name)
-          child.children && child.children.first && match(child.children.first)
+          return false unless child && child.respond_to?(:send_type?)
+          return child if matches_targets?(child.method_name)
+          child.children && match(child.children.first)
         end
 
         def matches_targets?(declared)
@@ -149,7 +146,8 @@ module RuboCop
           @message = MSG_OUTER_GROUPS % {group1: plural_form(first_error.first), group2: plural_form(first_error.last)}
         end
 
-        def set_within_group_error_message(type, a, b)
+        def set_within_group_error_message(type, a, b, mixed:)
+          return @message = MSG_MIXED_WITHIN_GROUP % { types: plural_form(type), type: type } if mixed
           first_error = a.zip(b).find { |x, y| x != y }
           @message = MSG_WITHIN_GROUP % {type: plural_form(type), method1: first_error.first, method2: first_error.last}
         end

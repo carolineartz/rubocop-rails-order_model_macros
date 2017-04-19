@@ -40,14 +40,27 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
         [
           'module Bar',
           '  class Foo < ActiveRecord::Base',
+          '     extend Razzle::Daz',
           '     include ::Bazzle::Baz',
+          '',
           '     MY_CONST = "cats"',
           '',
           '     has_one :foo',
+          '',
           '     has_and_belongs_to_many :bar',
           '',
           '     after_create :meow',
           '     before_create :boo',
+          '',
+          '     scope :blue, ->(green) { green.teal }',
+          '',
+          '     def self.rar',
+          '       splat',
+          '     end',
+          '',
+          '     def kitten',
+          '       puts "meow"',
+          '     end',
           '  end',
           'end'
         ]
@@ -241,7 +254,10 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
             '  class Foo < ActiveRecord::Base',
             '     cattr_reader :moo',
             '',
-            '     belongs_to :boo',
+            '     has_many :fa',
+            '     has_many :la',
+            '     has_and_belongs_to_many :ti',
+            '     has_many :so',
             '',
             '     validates :bar',
             '     validate :foo',
@@ -255,8 +271,8 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
       it 'recognizes the correct ordering error within groups' do
         mixed_invalid_inner_source
 
-        expect(cop.messages.first).to match(/Not sorted within validations/)
-        expect(cop.messages.first).to match(/Move validate above validates/)
+        expect(cop.messages.first).to match(/Not sorted within associations/)
+        expect(cop.messages.first).to match(/Group association types together/)
         expect(cop.offenses.map(&:line).sort).to eq([3])
       end
     end
