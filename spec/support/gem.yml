@@ -1,0 +1,4 @@
+Rails/OrderModelMacros:
+  Gem:
+    - acts_as_paranoid
+    - acts_as_list

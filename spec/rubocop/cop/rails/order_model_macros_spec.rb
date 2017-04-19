@@ -276,6 +276,37 @@ describe RuboCop::Cop::Rails::OrderModelMacros do
         expect(cop.offenses.map(&:line).sort).to eq([3])
       end
     end
+
+    context 'mixed invalid with Gems' do
+      before {  load_config_for cop, :gem }
+
+      let(:mixed_invaild_gems) do
+        inspect_source(
+          cop,
+          [
+            'module Bar',
+            '  class Foo < ActiveRecord::Base',
+            '     has_many :la',
+            '     has_and_belongs_to_many :ti',
+            '     has_many :so',
+            '',
+            '     delegate :bar',
+            '     acts_as_list :foo',
+            '     delegate :cat',
+            '  end',
+            'end'
+          ]
+        )
+      end
+
+      it 'recognizes the correct ordering error' do
+        mixed_invaild_gems
+
+        expect(cop.messages.first).to match(/Macro method groups not sorted/)
+        expect(cop.messages.first).to match(/Group delegate together/)
+        expect(cop.offenses.map(&:line).sort).to eq([3])
+      end
+    end
   end
 
   def load_config_for(cop, config_type)

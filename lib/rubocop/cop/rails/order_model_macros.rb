@@ -8,6 +8,7 @@ module RuboCop
         MSG_OUTER_GROUPS = "Macro method groups not sorted. Move %{group1} above %{group2}.".freeze
         MSG_WITHIN_GROUP = "Not sorted within %{type}. Move %{method1} above %{method2}.".freeze
         MSG_MIXED_WITHIN_GROUP = "Not sorted within %{types}. Group %{type} types together."
+        MSG_MIXED_OUTER_GROUPS = "Macro method groups not sorted. Group %{types} together."
 
         DEFAULT_SCOPE = :default_scope
         CLASS_METHODS = /^[mc]attr_(reader|writer|accessor)/
@@ -51,7 +52,7 @@ module RuboCop
             a = (ordered_for_type & squeezed)
             b = (squeezed & ordered_for_type)
 
-            !mixed && a == b or set_within_group_error_message(type, a, b, mixed: mixed) && false
+            (!mixed && a == b) or set_within_group_error_message(type, a, b, mixed: mixed) && false
           end
         end
 
@@ -61,7 +62,6 @@ module RuboCop
 
         def correct_grouping?(targets)
           target_types = target_types(targets)
-          return false unless single_groups?(target_types)
 
           type_order = preferred_group_ordering.keys
           squeezed = squeeze(target_types)
@@ -69,6 +69,7 @@ module RuboCop
           a = type_order & squeezed
           b = squeezed & type_order
 
+          single_groups?(squeezed) or set_outer_group_error_message(a, b, types: squeezed.select { |type| squeezed.count(type) > 1 }.uniq) && return
           a == b or set_outer_group_error_message(a, b) && false
         end
 
@@ -141,7 +142,8 @@ module RuboCop
           end
         end
 
-        def set_outer_group_error_message(a, b)
+        def set_outer_group_error_message(a, b, types: [])
+          return @message = MSG_MIXED_OUTER_GROUPS % { types: types.join(", ") } if types.any?
           first_error = a.zip(b).find { |x, y| x != y }
           @message = MSG_OUTER_GROUPS % {group1: plural_form(first_error.first), group2: plural_form(first_error.last)}
         end
