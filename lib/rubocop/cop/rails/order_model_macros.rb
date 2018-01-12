@@ -32,7 +32,7 @@ module RuboCop
           targets = target_methods(body)
           return true if correct_grouping?(targets) && correct_within_groups?(targets)
 
-          add_offense(body, :expression, @message || MSG)
+          add_offense(body, message: @message || MSG)
         end
 
         private
