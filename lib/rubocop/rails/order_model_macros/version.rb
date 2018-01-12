@@ -4,7 +4,7 @@ module RuboCop
   module Rails
     module OrderModelMacros
       module Version
-        STRING = "0.1.24".freeze
+        STRING = "0.2.0".freeze
 
         def self.gem_version
           Gem::Version.new(STRING)
